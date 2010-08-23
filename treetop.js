@@ -5,6 +5,7 @@ Treetop.Parser.create = function()
 
     var tt = {};
     tt.rules = [];
+    tt.consumeAllInput = true;
 
     tt.parse = function(code, environment)
     {

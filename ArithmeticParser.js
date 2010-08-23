@@ -8,12 +8,15 @@ ArithmeticParser.create = function()
         {
             var summable = { code: code };
 
+            var nonSummableEvalFunction = function(environment)
+            {
+                return ap.multiplicative(summable.code).eval(environment);
+            }
+
+            // If we don't have a plus sign, it must be a plain multiplicative
             if (!/\+/.test(summable.code))
             {
-                summable.eval = function(environment)
-                {
-                    return ap.multiplicative(summable.code).eval(environment);
-                }
+                summable.eval = nonSummableEvalFunction;
                 return summable;
             }
 
@@ -24,9 +27,11 @@ ArithmeticParser.create = function()
 
             var beforeResult = ap.multiplicative(before);
             var afterResult = ap.summable(after);
+            // If before and after are not multiplicative, it must be a plain multiplicative
             if (!beforeResult || !afterResult)
             {
-                return false;
+                summable.eval = nonSummableEvalFunction;
+                return summable;
             }
 
             summable.eval = function(environment)
@@ -40,12 +45,15 @@ ArithmeticParser.create = function()
         {
             var multiplicative = { code: code };
 
+            var nonMultiplicativeEvalFunction = function(environment)
+            {
+                var result = ap.parenthesized(multiplicative.code) || ap.primary(multiplicative.code);
+                return result.eval(environment);
+            }
+
             if (!/\*/.test(code))
             {
-                multiplicative.eval = function(environment)
-                {
-                    return ap.primary(multiplicative.code).eval(environment);
-                }
+                multiplicative.eval = nonMultiplicativeEvalFunction;
                 return multiplicative;
             }
 
@@ -54,11 +62,14 @@ ArithmeticParser.create = function()
             var before = multiplicative.code.substring(0, location);
             var after = multiplicative.code.substring(location + 1);
 
-            var beforeResult = ap.primary(before);
+            var beforeResult = ap.parenthesized(before) || ap.primary(before);
             var afterResult = ap.multiplicative(after);
+            // If before and after are not multiplicative, it must be a plain multiplicative
             if (!beforeResult || !afterResult)
             {
-                return false;
+                debugger;
+                multiplicative.eval = nonMultiplicativeEvalFunction;
+                return multiplicative;
             }
 
             multiplicative.eval = function(environment)
@@ -68,6 +79,24 @@ ArithmeticParser.create = function()
                 return (a * b);
             }
             return multiplicative;
+        },
+
+        ap.parenthesized = function(code)
+        {
+            var parenthesized = { code: code };
+
+            if (!/^\(.*\)$/.test(code))
+            {
+                return false;
+            }
+
+            parenthesized.eval = function(environment)
+            {
+                var unparenthesizedCode = parenthesized.code.substring(1, parenthesized.code.length - 1);
+                return ap.summable(unparenthesizedCode).eval(environment);
+            }
+
+            return parenthesized;
         },
 
         ap.primary = function(code)

@@ -15,10 +15,20 @@
 <script type="text/javascript">
 var tests = [
     { code: "0",        environment: {},        result: 0 },
+    { code: "(0)",      environment: {},        result: 0 },
     { code: "123",      environment: {},        result: 123 },
+    { code: "(123)",    environment: {},        result: 123 },
     { code: "n",        environment: {n: 2},    result: 2 },
+    { code: "(n)",      environment: {n: 2},    result: 2 },
     { code: "2*3",      environment: {},        result: 6 },
+    { code: "(2*3)",    environment: {},        result: 6 },
     { code: "2*3*4",    environment: {},        result: 24 },
+    { code: "(2*3)*4",  environment: {},        result: 24 },
+    { code: "2*(3*4)",  environment: {},        result: 24 },
+    { code: "(2*3*4)",  environment: {},        result: 24 },
+    { code: "(2)*3*4",  environment: {},        result: 24 },
+    { code: "2*(3)*4",  environment: {},        result: 24 },
+    { code: "2*3*(4)",  environment: {},        result: 24 },
     { code: "3*n",      environment: {n: 2},    result: 6 },
     // { code: "3 * 2",    environment: {},        result: 6 },    // Fails currently
     { code: "1+2*3",    environment: {},        result: 7 },
