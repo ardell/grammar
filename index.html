@@ -1,0 +1,55 @@
+<html>
+
+<head>
+<script type="text/javascript" src="treetop.js"></script>
+<script type="text/javascript" src="ArithmeticParser.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+</head>
+
+<body>
+
+<h1>Beginnings of Treetop in Javascript</h1>
+
+<ol id="results"></ol>
+
+<script type="text/javascript">
+var tests = [
+    { code: "0",        environment: {},        result: 0 },
+    { code: "123",      environment: {},        result: 123 },
+    { code: "n",        environment: {n: 2},    result: 2 },
+    { code: "2*3",      environment: {},        result: 6 },
+    { code: "2*3*4",    environment: {},        result: 24 },
+    { code: "3*n",      environment: {n: 2},    result: 6 },
+    { code: "3 * 2",    environment: {},        result: 6 },    // Fails currently
+    { code: "1+2*3",    environment: {},        result: 7 },
+    { code: "2*3+1",    environment: {},        result: 7 },
+    { code: "1+2*3+4",  environment: {},        result: 11 },
+    { code: "n+2*3",    environment: {n: 2},    result: 8 },
+    { code: "1+n*3",    environment: {n: 2},    result: 7 },
+    { code: "1+2*n",    environment: {n: 2},    result: 5 },
+    { code: "n*3+1",    environment: {n: 2},    result: 7 },
+    { code: "2*n+1",    environment: {n: 2},    result: 5 },
+    { code: "2*3+n",    environment: {n: 2},    result: 8 },
+    { code: "n+2*3+4",  environment: {n: 2},    result: 12 },
+    { code: "1+n*3+4",  environment: {n: 2},    result: 11 },
+    { code: "1+2*n+4",  environment: {n: 2},    result: 9 },
+    { code: "1+2*3+n",  environment: {n: 2},    result: 9 }
+];
+
+var ap = ArithmeticParser.create();
+for(var i in tests)
+{
+    var test = tests[i];
+    var tree = ap.parse(test.code, test.environment);
+    if (tree == test.result)
+    {
+        $('#results').append("<li>Success: " + test.code + " does equal " + test.result + ".</li>");
+    } else {
+        $('#results').append("<li>Failure: " + test.code + " does not equal " + test.result + ", instead it equals " + tree + ".</li>");
+    }
+}
+</script>
+
+</body>
+
+</html>
