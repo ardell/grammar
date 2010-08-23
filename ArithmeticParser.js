@@ -34,37 +34,60 @@ ArithmeticParser.create = function()
             return (ap.primary(before, environment) * ap.multiplicative(after, environment));
         },
 
-        ap.primary = {
-            match: function(code)
+        ap.primary = function(code)
+        {
+            var type = null;
+
+            if (ap.variable(code))
             {
-                return ap.variable.match(code) || ap.number.match(code);
-            },
-            eval: function(environment)
-            {
-                return ap.variable.eval(environment) || ap.number.eval(environment);
+                ap.primary.eval = function(environment)
+                {
+                    return ap.variable.eval(environment);
+                };
+            } else if (ap.number(code)) {
+                ap.primary.eval = function(environment)
+                {
+                    return ap.number.eval(environment);
+                };
+            } else {
+                return false;
             }
+
+            return ap.primary;
         },
 
-        ap.variable = function(code, environment)
+        ap.variable = function(code)
         {
             var regex = /^[a-zA-Z]*$/;
-            if (regex.test(code))
+            if (!regex.test(code))
+            {
+                return false;
+            }
+
+            ap.variable.eval = function(environment)
             {
                 return environment[code];
             }
-
-            return false;
+            return ap.variable;
         },
 
-        ap.number = {
-            match: function(code)
-            {
-                return code == '0' || /^[1-9][0-9]*$/.test(code);
-            },
-            eval: function(environment)
+        ap.number = function(code)
+        {
+            // ap.number should return either an instance
+            // of ap.number or false, and should have eval
+            // defined inside it.
+            // Code should be accessible via closure
+            // so that we can access it when we run eval
+            ap.number.eval = function(environment)
             {
                 return parseInt(code);
+            };
+
+            if (code == '0' || /^[1-9][0-9]*$/.test(code))
+            {
+                return ap.number;
             }
+            return false;
         },
 
         ap.space = function(code, environment)

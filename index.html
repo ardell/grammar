@@ -40,12 +40,13 @@ var ap = ArithmeticParser.create();
 for(var i in tests)
 {
     var test = tests[i];
-    var tree = ap.parse(test.code, test.environment);
-    if (tree == test.result)
+    var tree = ap.parse(test.code);
+    var val = tree.eval(test.environment);
+    if (val == test.result)
     {
         $('#results').append("<li>Success: " + test.code + " does equal " + test.result + ".</li>");
     } else {
-        $('#results').append("<li>Failure: " + test.code + " does not equal " + test.result + ", instead it equals " + tree + ".</li>");
+        $('#results').append("<li>Failure: " + test.code + " does not equal " + test.result + ", instead it equals " + val + ".</li>");
     }
 }
 </script>
