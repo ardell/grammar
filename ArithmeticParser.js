@@ -4,90 +4,125 @@ ArithmeticParser.create = function()
 
     var ap = Treetop.Parser.create();
     ap.rules = [
-        ap.summable = function(code, environment)
+        ap.summable = function(code)
         {
-            if (!/\+/.test(code))
+            var summable = { code: code };
+
+            if (!/\+/.test(summable.code))
             {
-                return ap.multiplicative(code, environment);
+                summable.eval = function(environment)
+                {
+                    return ap.multiplicative(summable.code).eval(environment);
+                }
+                return summable;
             }
 
             // Find the plus sign and split the string
-            var location = code.indexOf('+');
-            var before = code.substring(0, location);
-            var after = code.substring(location + 1);
+            var location = summable.code.indexOf('+');
+            var before = summable.code.substring(0, location);
+            var after = summable.code.substring(location + 1);
 
-            return (ap.multiplicative(before, environment) + ap.summable(after, environment));
+            var beforeResult = ap.multiplicative(before);
+            var afterResult = ap.summable(after);
+            if (!beforeResult || !afterResult)
+            {
+                return false;
+            }
+
+            summable.eval = function(environment)
+            {
+                return (beforeResult.eval(environment) + afterResult.eval(environment));
+            }
+            return summable;
         },
 
-        ap.multiplicative = function(code, environment)
+        ap.multiplicative = function(code)
         {
+            var multiplicative = { code: code };
+
             if (!/\*/.test(code))
             {
-                return ap.primary(code, environment);
+                multiplicative.eval = function(environment)
+                {
+                    return ap.primary(multiplicative.code).eval(environment);
+                }
+                return multiplicative;
             }
 
             // Find the plus sign and split the string
-            var location = code.indexOf('*');
-            var before = code.substring(0, location);
-            var after = code.substring(location + 1);
+            var location = multiplicative.code.indexOf('*');
+            var before = multiplicative.code.substring(0, location);
+            var after = multiplicative.code.substring(location + 1);
 
-            return (ap.primary(before, environment) * ap.multiplicative(after, environment));
+            var beforeResult = ap.primary(before);
+            var afterResult = ap.multiplicative(after);
+            if (!beforeResult || !afterResult)
+            {
+                return false;
+            }
+
+            multiplicative.eval = function(environment)
+            {
+                var a = beforeResult.eval(environment);
+                var b = afterResult.eval(environment);
+                return (a * b);
+            }
+            return multiplicative;
         },
 
         ap.primary = function(code)
         {
-            var type = null;
+            var primary = { code: code };
 
             if (ap.variable(code))
             {
-                ap.primary.eval = function(environment)
+                primary.eval = function(environment)
                 {
-                    return ap.variable.eval(environment);
-                };
+                    return ap.variable(primary.code).eval(environment);
+                }
             } else if (ap.number(code)) {
-                ap.primary.eval = function(environment)
+                primary.eval = function(environment)
                 {
-                    return ap.number.eval(environment);
-                };
+                    return ap.number(primary.code).eval(environment);
+                }
             } else {
                 return false;
             }
 
-            return ap.primary;
+            return primary;
         },
 
         ap.variable = function(code)
         {
+            var variable = { code: code };
+
             var regex = /^[a-zA-Z]*$/;
             if (!regex.test(code))
             {
                 return false;
             }
 
-            ap.variable.eval = function(environment)
+            variable.eval = function(environment)
             {
-                return environment[code];
+                return environment[variable.code];
             }
-            return ap.variable;
+            return variable;
         },
 
         ap.number = function(code)
         {
-            // ap.number should return either an instance
-            // of ap.number or false, and should have eval
-            // defined inside it.
-            // Code should be accessible via closure
-            // so that we can access it when we run eval
-            ap.number.eval = function(environment)
-            {
-                return parseInt(code);
-            };
+            var number = { code: code };
 
-            if (code == '0' || /^[1-9][0-9]*$/.test(code))
+            if (code != '0' && !/^[1-9][0-9]*$/.test(code))
             {
-                return ap.number;
+                return false;
             }
-            return false;
+
+            number.eval = function(environment)
+            {
+                return parseInt(number.code);
+            };
+            return number;
         },
 
         ap.space = function(code, environment)
