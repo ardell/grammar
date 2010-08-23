@@ -34,9 +34,15 @@ ArithmeticParser.create = function()
             return (ap.primary(before, environment) * ap.multiplicative(after, environment));
         },
 
-        ap.primary = function(code, environment)
-        {
-            return ap.variable(code, environment) || ap.number(code, environment);
+        ap.primary = {
+            match: function(code)
+            {
+                return ap.variable.match(code) || ap.number.match(code);
+            },
+            eval: function(environment)
+            {
+                return ap.variable.eval(environment) || ap.number.eval(environment);
+            }
         },
 
         ap.variable = function(code, environment)
@@ -50,14 +56,15 @@ ArithmeticParser.create = function()
             return false;
         },
 
-        ap.number = function(code, environment)
-        {
-            if (/^[1-9][0-9]*$/.test(code) || code == '0')
+        ap.number = {
+            match: function(code)
+            {
+                return code == '0' || /^[1-9][0-9]*$/.test(code);
+            },
+            eval: function(environment)
             {
                 return parseInt(code);
             }
-
-            return false;
         },
 
         ap.space = function(code, environment)
