@@ -13,100 +13,160 @@
 <ol id="results"></ol>
 
 <script type="text/javascript">
-// Grammar parser tests
-var ap = ArithmeticParser.create();
-var tests = [
-    { code: "",         parseable: false },
-    { code: "0",        parseable: true },
-    { code: "(0)",      parseable: true },
-    { code: "123",      parseable: true },
-    { code: "1+2",      parseable: true },
-    { code: "2*3",      parseable: true },
-    { code: "(2*3)",    parseable: true },
-    { code: "2*(3)",    parseable: true },
-    { code: "2(*3)",    parseable: false },
-    { code: "(2*)3",    parseable: false },
-    { code: "(2*3)*4",  parseable: true },
-    { code: "2*(3*4)",  parseable: true },
-    { code: "(1",       parseable: false },
-    { code: "1)",       parseable: false },
-    { code: ")1",       parseable: false },
-    { code: "1(",       parseable: false },
-    { code: "()",       parseable: false },
-    { code: "1+",       parseable: false },
-    { code: "+1",       parseable: false },
-];
-for(var i in tests)
+var Tests = {};
+Tests.BootstrapGrammar = {}
+Tests.BootstrapGrammar.definition = function()
 {
-    var test = tests[i];
-    var val = null;
-    if (test.rule)
+    // Bootstrap grammar tests
+    var tests = [
+        { code: "number",               parseable: true }
+        // { code: "variable",             parseable: true },
+        // { code: "number / variable",    parseable: true },
+    ];
+    return tests;
+}
+Tests.BootstrapGrammar.run = function()
+{
+    var bg = Treetop.BootstrapGrammar.create();
+    var tests = Tests.BootstrapGrammar.definition();
+    for(var i in tests)
     {
-        val = test.rule(test.code);
-    } else {
-        val = ap.parse(test.code);
-    }
+        var test = tests[i];
+        var val = null;
+        if (test.rule)
+        {
+            val = test.rule(test.code);
+        } else {
+            val = bg.parse(test.code);
+        }
 
-    if (val && test.parseable)
-    {
-        $('#results').append("<li>Success: " + test.code + " was parseable.</li>");
-    } else if (!val && !test.parseable) {
-        $('#results').append("<li>Success: " + test.code + " was not parseable, as expected.</li>");
-    } else if (!val && test.parseable) {
-        $('#results').append("<li>Failure: " + test.code + " was not parseable, it was expected to be parseable.</li>");
-    } else {
-        $('#results').append("<li>Failure: " + test.code + " was parseable, it was expected not to be.</li>");
+        if (val && test.parseable)
+        {
+            $('#results').append("<li>Success: " + test.code + " was parseable.</li>");
+        } else if (!val && !test.parseable) {
+            $('#results').append("<li>Success: " + test.code + " was not parseable, as expected.</li>");
+        } else if (!val && test.parseable) {
+            $('#results').append("<li>Failure: " + test.code + " was not parseable, it was expected to be parseable.</li>");
+        } else {
+            $('#results').append("<li>Failure: " + test.code + " was parseable, it was expected not to be.</li>");
+        }
     }
 }
 
-// Arithmetic tests
-var tests = [
-    { code: "0",        environment: {},        result: 0 },
-    { code: "(0)",      environment: {},        result: 0 },
-    { code: "123",      environment: {},        result: 123 },
-    { code: "(123)",    environment: {},        result: 123 },
-    { code: "n",        environment: {n: 2},    result: 2 },
-    { code: "(n)",      environment: {n: 2},    result: 2 },
-    { code: "2*3",      environment: {},        result: 6 },
-    { code: "(2*3)",    environment: {},        result: 6 },
-    { code: "2*3*4",    environment: {},        result: 24 },
-    { code: "2*(3*4)",  environment: {},        result: 24 },
-    { code: "(2*3)*4",  environment: {},        result: 24 },
-    { code: "2*(3*4)",  environment: {},        result: 24 },
-    { code: "(2*3*4)",  environment: {},        result: 24 },
-    { code: "(2)*3*4",  environment: {},        result: 24 },
-    { code: "2*(3)*4",  environment: {},        result: 24 },
-    { code: "2*3*(4)",  environment: {},        result: 24 },
-    { code: "3*n",      environment: {n: 2},    result: 6 },
-    // { code: "3 * 2",    environment: {},        result: 6 },    // Fails currently
-    { code: "1+2*3",    environment: {},        result: 7 },
-    { code: "2*3+1",    environment: {},        result: 7 },
-    { code: "1+2*3+4",  environment: {},        result: 11 },
-    { code: "n+2*3",    environment: {n: 2},    result: 8 },
-    { code: "1+n*3",    environment: {n: 2},    result: 7 },
-    { code: "1+2*n",    environment: {n: 2},    result: 5 },
-    { code: "n*3+1",    environment: {n: 2},    result: 7 },
-    { code: "2*n+1",    environment: {n: 2},    result: 5 },
-    { code: "2*3+n",    environment: {n: 2},    result: 8 },
-    { code: "n+2*3+4",  environment: {n: 2},    result: 12 },
-    { code: "1+n*3+4",  environment: {n: 2},    result: 11 },
-    { code: "1+2*n+4",  environment: {n: 2},    result: 9 },
-    { code: "1+2*3+n",  environment: {n: 2},    result: 9 }
-];
-
-var ap = ArithmeticParser.create();
-for(var i in tests)
+Tests.ArithmeticGrammar = {}
+Tests.ArithmeticGrammar.definition = function()
 {
-    var test = tests[i];
-    var tree = ap.parse(test.code);
-    var val = tree.eval(test.environment);
-    if (val == test.result)
+    var tests = [
+        { code: "",         parseable: false },
+        { code: "0",        parseable: true },
+        { code: "(0)",      parseable: true },
+        { code: "123",      parseable: true },
+        { code: "1+2",      parseable: true },
+        { code: "2*3",      parseable: true },
+        { code: "(2*3)",    parseable: true },
+        { code: "2*(3)",    parseable: true },
+        { code: "2(*3)",    parseable: false },
+        { code: "(2*)3",    parseable: false },
+        { code: "(2*3)*4",  parseable: true },
+        { code: "2*(3*4)",  parseable: true },
+        { code: "(1",       parseable: false },
+        { code: "1)",       parseable: false },
+        { code: ")1",       parseable: false },
+        { code: "1(",       parseable: false },
+        { code: "()",       parseable: false },
+        { code: "1+",       parseable: false },
+        { code: "+1",       parseable: false },
+    ];
+    return tests;
+}
+Tests.ArithmeticGrammar.run = function()
+{
+    var ap = ArithmeticParser.create();
+    var tests = Tests.ArithmeticGrammar.definition();
+    for(var i in tests)
     {
-        $('#results').append("<li>Success: " + test.code + " does equal " + test.result + ".</li>");
-    } else {
-        $('#results').append("<li>Failure: " + test.code + " does not equal " + test.result + ", instead it equals " + val + ".</li>");
+        var test = tests[i];
+        var val = null;
+        if (test.rule)
+        {
+            val = test.rule(test.code);
+        } else {
+            val = ap.parse(test.code);
+        }
+
+        if (val && test.parseable)
+        {
+            $('#results').append("<li>Success: " + test.code + " was parseable.</li>");
+        } else if (!val && !test.parseable) {
+            $('#results').append("<li>Success: " + test.code + " was not parseable, as expected.</li>");
+        } else if (!val && test.parseable) {
+            $('#results').append("<li>Failure: " + test.code + " was not parseable, it was expected to be parseable.</li>");
+        } else {
+            $('#results').append("<li>Failure: " + test.code + " was parseable, it was expected not to be.</li>");
+        }
     }
 }
+
+Tests.Arithmetic = {}
+Tests.Arithmetic.definition = function()
+{
+    var tests = [
+        { code: "0",        environment: {},        result: 0 },
+        { code: "(0)",      environment: {},        result: 0 },
+        { code: "123",      environment: {},        result: 123 },
+        { code: "(123)",    environment: {},        result: 123 },
+        { code: "n",        environment: {n: 2},    result: 2 },
+        { code: "(n)",      environment: {n: 2},    result: 2 },
+        { code: "2*3",      environment: {},        result: 6 },
+        { code: "(2*3)",    environment: {},        result: 6 },
+        { code: "2*3*4",    environment: {},        result: 24 },
+        { code: "2*(3*4)",  environment: {},        result: 24 },
+        { code: "(2*3)*4",  environment: {},        result: 24 },
+        { code: "2*(3*4)",  environment: {},        result: 24 },
+        { code: "(2*3*4)",  environment: {},        result: 24 },
+        { code: "(2)*3*4",  environment: {},        result: 24 },
+        { code: "2*(3)*4",  environment: {},        result: 24 },
+        { code: "2*3*(4)",  environment: {},        result: 24 },
+        { code: "3*n",      environment: {n: 2},    result: 6 },
+        // { code: "3 * 2",    environment: {},        result: 6 },    // Fails currently
+        { code: "1+2*3",    environment: {},        result: 7 },
+        { code: "2*3+1",    environment: {},        result: 7 },
+        { code: "1+2*3+4",  environment: {},        result: 11 },
+        { code: "n+2*3",    environment: {n: 2},    result: 8 },
+        { code: "1+n*3",    environment: {n: 2},    result: 7 },
+        { code: "1+2*n",    environment: {n: 2},    result: 5 },
+        { code: "n*3+1",    environment: {n: 2},    result: 7 },
+        { code: "2*n+1",    environment: {n: 2},    result: 5 },
+        { code: "2*3+n",    environment: {n: 2},    result: 8 },
+        { code: "n+2*3+4",  environment: {n: 2},    result: 12 },
+        { code: "1+n*3+4",  environment: {n: 2},    result: 11 },
+        { code: "1+2*n+4",  environment: {n: 2},    result: 9 },
+        { code: "1+2*3+n",  environment: {n: 2},    result: 9 }
+    ];
+    return tests;
+}
+Tests.Arithmetic.run = function()
+{
+    var ap = ArithmeticParser.create();
+    var tests = Tests.Arithmetic.definition();
+    for(var i in tests)
+    {
+        var test = tests[i];
+        var tree = ap.parse(test.code);
+        var val = tree.eval(test.environment);
+        if (val == test.result)
+        {
+            $('#results').append("<li>Success: " + test.code + " does equal " + test.result + ".</li>");
+        } else {
+            $('#results').append("<li>Failure: " + test.code + " does not equal " + test.result + ", instead it equals " + val + ".</li>");
+        }
+    }
+}
+
+// Run the tests we want to run
+Tests.BootstrapGrammar.run();
+// Tests.ArithmeticGrammar.run();
+// Tests.Arithmetic.run();
 </script>
 
 </body>

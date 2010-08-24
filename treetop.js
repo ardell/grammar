@@ -21,3 +21,24 @@ Treetop.Parser.create = function()
     return tt;
 
 }
+
+Treetop.BootstrapGrammar = {};
+Treetop.BootstrapGrammar.create = function()
+{
+
+    var bg = Treetop.Parser.create();
+    bg.rules = [
+        bg.operand = function(code)
+        {
+            if (!/^[a-zA-Z][a-zA-Z0-9]*$/.test(code))
+            {
+                return false;
+            }
+
+            return bg.operand;
+        },
+    ];
+
+    return bg;
+
+}

@@ -12,11 +12,21 @@ ArithmeticParser.create = function()
                 ap.summable(code);
         },
 
+        /**
+         * A summable is a summation expression of
+         * 1) primary / parenthesized / multiplicative
+         * 2) additive_operator
+         * 3) arithmetic
+         */
         ap.summable = function(code)
         {
             var summable = { code: code };
 
-            // Find all the multiplication signs and what's before and after them
+            // var grammar = "(primary / parenthesized / multitive) + arithmetic";
+            // var tree = ap.match(code, grammar);
+            // return tree;
+
+            // Find all the addition signs and what's before and after them
             summable.tokens = summable.code.tokenize('+');
             // Return the first one that's parseable
             for (var i in summable.tokens)
