@@ -15,22 +15,25 @@
 <script type="text/javascript">
 var Tests = {};
 Tests.BootstrapGrammar = {}
+var bg = Treetop.BootstrapGrammar.create();
 Tests.BootstrapGrammar.definition = function()
 {
     // Bootstrap grammar tests
     var tests = [
-        { code: "number",               parseable: true }
-        // { code: "variable",             parseable: true },
+        { code: "number",               parseable: true },
+        { code: "variable",             parseable: true },
+        { code: " ",                    parseable: true,    rule: bg.space },
+        { code: "number variable",      parseable: true }
         // { code: "number / variable",    parseable: true },
     ];
     return tests;
 }
 Tests.BootstrapGrammar.run = function()
 {
-    var bg = Treetop.BootstrapGrammar.create();
     var tests = Tests.BootstrapGrammar.definition();
     for(var i in tests)
     {
+        console.log("Starting test " + i);
         var test = tests[i];
         var val = null;
         if (test.rule)
