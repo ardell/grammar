@@ -20,11 +20,21 @@ Tests.BootstrapGrammar.definition = function()
 {
     // Bootstrap grammar tests
     var tests = [
-        { numResults: 0,        code: "",                   rules: []                                   },
-        { numResults: 1,        code: "number",             rules: [bg.operand]                         },
-        { numResults: 0,        code: "number",             rules: [bg.operand, bg.space]   },
-        { numResults: 0,        code: "number",             rules: [bg.operand, bg.space, bg.operand]   },
-        // { numResults: 1,        code: "number variable",    rules: [bg.operand, bg.space, bg.operand]   }
+        { numResults: 0,        code: "",                                       rules: []                                                               },
+        { numResults: 1,        code: " ",                                      rules: [bg.space]                                                       },
+        { numResults: 1,        code: "",                                       rules: [bg.space]                                                       },
+        { numResults: 1,        code: "number",                                 rules: [bg.operand]                                                     },
+        { numResults: 1,        code: "number",                                 rules: [bg.operand, bg.space]                                           },
+        { numResults: 5,        code: "number",                                 rules: [bg.operand, bg.space, bg.operand]                               },
+        { numResults: 1,        code: "number variable",                        rules: [bg.operand, bg.space, bg.operand]                               },
+        { numResults: 1,        code: "number number",                          rules: [bg.operand, bg.space, bg.operand]                               },
+        { numResults: 1,        code: "variable variable",                      rules: [bg.operand, bg.space, bg.operand]                               },
+        { numResults: 1,        code: "number variable",                        rules: [bg.operand, bg.space, bg.operand]                               },
+        { numResults: 1,        code: "number number",                          rules: [bg.operand, bg.space, bg.operand]                               },
+        { numResults: 1,        code: "variable variable",                      rules: [bg.operand, bg.space, bg.operand]                               },
+        { numResults: 1,        code: "number / variable",                      rules: [bg.operand, bg.space, bg.orSign, bg.space, bg.operand]          },
+        { numResults: 1,        code: "(number / variable)",                    rules: [bg.parenthesized]                                               },
+        { numResults: 1,        code: "(number / variable) operator variable",  rules: [bg.parenthesized, bg.space, bg.operand, bg.space, bg.operand]  }
     ];
     return tests;
 }
@@ -38,9 +48,8 @@ Tests.BootstrapGrammar.run = function()
 
         if (val.length == test.numResults)
         {
-            $('#results').append("<li>Success: there were " + val.length + " results, expected " + test.numResults + ".</li>");
+            $('#results').append("<li>Successfully parsed: '" + test.code + "'. There were " + val.length + " results, expected " + test.numResults + ".</li>");
         } else {
-            debugger;
             $('#results').append("<li>Failure: there were " + val.length + " results, expected " + test.numResults + ".</li>");
         }
     }
