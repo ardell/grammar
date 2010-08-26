@@ -7,18 +7,9 @@ Treetop.Parser.create = function()
     tt.rules = [];
     tt.consumeAllInput = true;
 
-    tt.parse = function(code)
-    {
-        if (tt.rules.length == 0)
-        {
-            throw("Please define a grammar by extending the parser");
-        }
-
-        var topLevelFunction = tt.rules[0];
-        return topLevelFunction(code);
-    }
-
     /**
+     * Given code: "" and rules [] return false
+     *
      * Given "number" and rules [operand]
      * We should get back the following parse tree:
      * [
@@ -28,7 +19,7 @@ Treetop.Parser.create = function()
      * ]
      *
      * Given "number" and rules [operand, space, operand]
-     * We should get back an empty parse tree []
+     * Return false
      *
      * Given "number variable" and rules [operand, space, operand]
      * We should get back a parse tree with only one option:
@@ -40,31 +31,66 @@ Treetop.Parser.create = function()
      *  ]
      * ]
      */
-    tt.findToken = function(rule, code)
+    tt.parse = function(code, rules)
     {
-        var findToken = {
-            rule: rule,
+        var parse = {
             code: code,
+            rules: rules,
             matches: []
         };
 
-        if (findToken.code.length == 0)
+        if (parse.rules.length == 0)
         {
-            return;
+            return [];
         }
 
-
-        // See if this code matches the rule
-        if (findToken.rule(findToken.code))
+        if (parse.code.length == 0)
         {
-            findToken.matches.push(findToken.code);
+            return [];
         }
 
-        // Recurse with code 1 character shorter
-        findToken.shorterCode = findToken.code.substring(0, findToken.code.length - 1);
-        findToken.matches.concat( tt.findToken(findToken.rule, findToken.shorterCode) );
+        if (parse.rules.length == 1)
+        {
+            // Return the results of the applied rule
+            parse.ruleToMatch = parse.rules.shift();
+            if (parse.ruleToMatch(parse.code))
+            {
+                // Success!
+                return [{ code: parse.code }];
+            }
 
-        return findToken.matches;
+            // The code did not match the rule
+            return [];
+        }
+
+        parse.ruleToMatch = parse.rules.shift();
+        // Find all matches for the first rule
+        for (var i = 1; i <= code.length; i++)
+        {
+            parse.codeSubject = code.substring(0, i);
+            parse.codeRest = code.substring(i);
+
+            // Continue if the code subject didn't match our current rule
+            parse.subjectParseResults = tt.parse(parse.codeSubject, [parse.ruleToMatch]);
+            if (parse.subjectParseResults.length <= 0)
+            {
+                continue;
+            }
+
+            // Continue if the rest of the code couldn't be parsed
+            parse.restParseResults = tt.parse(parse.codeRest, parse.rules);
+            if (parse.restParseResults.length <= 0)
+            {
+                continue;
+            }
+
+            // Success; both the current code subject and the rest were parsed
+            parse.matches.push(
+                [parse.subjectParseResults].concat(parse.restParseResults)
+            );
+        }
+
+        return parse.matches;
     }
 
     return tt;

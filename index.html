@@ -20,11 +20,11 @@ Tests.BootstrapGrammar.definition = function()
 {
     // Bootstrap grammar tests
     var tests = [
-        { code: "number",               parseable: true },
-        { code: "variable",             parseable: true },
-        { code: " ",                    parseable: true,    rule: bg.space },
-        { code: "number variable",      parseable: true }
-        // { code: "number / variable",    parseable: true },
+        { numResults: 0,        code: "",                   rules: []                                   },
+        { numResults: 1,        code: "number",             rules: [bg.operand]                         },
+        { numResults: 0,        code: "number",             rules: [bg.operand, bg.space]   },
+        { numResults: 0,        code: "number",             rules: [bg.operand, bg.space, bg.operand]   },
+        // { numResults: 1,        code: "number variable",    rules: [bg.operand, bg.space, bg.operand]   }
     ];
     return tests;
 }
@@ -33,25 +33,15 @@ Tests.BootstrapGrammar.run = function()
     var tests = Tests.BootstrapGrammar.definition();
     for(var i in tests)
     {
-        console.log("Starting test " + i);
         var test = tests[i];
-        var val = null;
-        if (test.rule)
-        {
-            val = test.rule(test.code);
-        } else {
-            val = bg.parse(test.code);
-        }
+        var val = bg.parse(test.code, test.rules);
 
-        if (val && test.parseable)
+        if (val.length == test.numResults)
         {
-            $('#results').append("<li>Success: " + test.code + " was parseable.</li>");
-        } else if (!val && !test.parseable) {
-            $('#results').append("<li>Success: " + test.code + " was not parseable, as expected.</li>");
-        } else if (!val && test.parseable) {
-            $('#results').append("<li>Failure: " + test.code + " was not parseable, it was expected to be parseable.</li>");
+            $('#results').append("<li>Success: there were " + val.length + " results, expected " + test.numResults + ".</li>");
         } else {
-            $('#results').append("<li>Failure: " + test.code + " was parseable, it was expected not to be.</li>");
+            debugger;
+            $('#results').append("<li>Failure: there were " + val.length + " results, expected " + test.numResults + ".</li>");
         }
     }
 }
